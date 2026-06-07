@@ -32,6 +32,39 @@ export async function getProduct(): Promise<PrintifyProduct> {
   return res.json() as Promise<PrintifyProduct>;
 }
 
+// Strip the Printify product to only what the storefront UI needs, so we never
+// serialize the production COST, description, or design-file names into the
+// client payload (which is visible in page source). Use this before passing the
+// product to any client component.
+export function toClientProduct(p: PrintifyProduct): PrintifyProduct {
+  return {
+    id: p.id,
+    title: p.title,
+    description: "",
+    options: (p.options ?? []).map((o) => ({
+      name: o.name,
+      type: o.type,
+      values: (o.values ?? []).map((v) => ({ id: v.id, title: v.title })),
+    })),
+    variants: (p.variants ?? []).map((v) => ({
+      id: v.id,
+      title: v.title,
+      price: v.price,
+      is_enabled: v.is_enabled,
+      is_available: v.is_available,
+      is_default: v.is_default,
+      options: v.options,
+      // cost intentionally omitted — never expose it to the client
+    })),
+    images: (p.images ?? []).map((i) => ({
+      src: i.src,
+      variant_ids: i.variant_ids,
+      position: i.position,
+      is_default: i.is_default,
+    })),
+  };
+}
+
 export interface CreateOrderInput {
   externalId: string; // Stripe session id — used for idempotency / reconciliation
   variantId: number;

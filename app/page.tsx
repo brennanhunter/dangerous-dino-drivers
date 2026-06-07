@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { PrintifyProduct } from "@/lib/types";
-import { getProduct } from "@/lib/printify";
+import { getProduct, toClientProduct } from "@/lib/printify";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PurchaseProvider } from "@/components/store/PurchaseProvider";
@@ -315,7 +315,7 @@ export default async function Home() {
   const { reviews, count, avgRating } = await getApprovedReviews();
 
   return (
-    <PurchaseProvider product={product}>
+    <PurchaseProvider product={toClientProduct(product)}>
       <div className="flex flex-1 flex-col bg-navy pb-24 lg:pb-0">
         <SiteHeader />
         <main className="flex-1">
