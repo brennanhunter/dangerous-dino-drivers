@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    // Printify mockup CDNs — required for next/image to render product photos.
+    remotePatterns: [
+      { protocol: "https", hostname: "images.printify.com" },
+      { protocol: "https", hostname: "images-api.printify.com" },
+    ],
+  },
 };
 
 export default nextConfig;
