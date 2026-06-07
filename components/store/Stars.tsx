@@ -14,7 +14,7 @@ export function Stars({
       aria-label={`${rating} out of 5 stars`}
     >
       {"★".repeat(full)}
-      <span className="text-white/20">{"★".repeat(5 - full)}</span>
+      <span className="text-white/40">{"★".repeat(5 - full)}</span>
     </span>
   );
 }

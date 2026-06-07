@@ -31,6 +31,13 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
+    // Only fulfill once payment is actually captured. Card/wallet checkouts are
+    // "paid" on completion; this also guards against async/delayed methods
+    // (e.g. bank debits) if they're ever enabled.
+    if (session.payment_status !== "paid") {
+      return NextResponse.json({ received: true, fulfilled: false });
+    }
+
     // v22: the collected SHIPPING address lives here — NOT session.shipping_details
     // (which doesn't exist) and NOT customer_details.address (that's billing).
     const shipping = session.collected_information?.shipping_details;

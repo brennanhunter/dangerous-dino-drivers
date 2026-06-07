@@ -2,8 +2,8 @@
 // Items marked PLACEHOLDER must be replaced with real content before launch.
 
 export const STORE = {
-  // PLACEHOLDER — set a real inbox you monitor (trust signal + Stripe requirement).
-  contactEmail: "hello@dangerousdinodrivers.com",
+  contactEmail: "dangerousdinodrivers@gmail.com",
+  phone: "386-610-3000",
   social: "@dangerousdinodrivers",
   shippingNote: "Ships in 3–7 business days",
   guaranteeDays: 30,
@@ -36,30 +36,6 @@ export const BENEFITS = [
     icon: "🦖",
     title: "Designs Kids Show Off",
     text: "Original dino-driver art so good your kid will give you the bedroom tour.",
-  },
-];
-
-// PLACEHOLDER reviews — REPLACE with real customer reviews before launch.
-// Publishing fabricated reviews violates the FTC's rule on fake reviews
-// (16 CFR Part 465). These exist only to design the section.
-export const REVIEWS = [
-  {
-    name: "Sample Reviewer",
-    location: "Austin, TX",
-    rating: 5,
-    text: "My son refuses to sleep without it now. The print is vivid and it’s held up to a dozen washes already.",
-  },
-  {
-    name: "Sample Reviewer",
-    location: "Columbus, OH",
-    rating: 5,
-    text: "Bought it as a birthday gift and it stole the show. Super soft and the dino is hilarious.",
-  },
-  {
-    name: "Sample Reviewer",
-    location: "San Jose, CA",
-    rating: 5,
-    text: "Exactly like the photos, shipped fast, and my daughter is obsessed. Already ordering another.",
   },
 ];
 

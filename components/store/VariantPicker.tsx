@@ -20,7 +20,7 @@ export function VariantPicker() {
               type="button"
               onClick={() => setVariant(v)}
               aria-pressed={active}
-              className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-aqua ${
                 active
                   ? "border-aqua bg-aqua text-navy"
                   : "border-white/15 bg-white/5 text-white hover:border-white/40"

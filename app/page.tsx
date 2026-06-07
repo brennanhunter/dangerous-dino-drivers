@@ -1,57 +1,15 @@
 import Image from "next/image";
 import type { PrintifyProduct } from "@/lib/types";
 import { getProduct } from "@/lib/printify";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { PurchaseProvider } from "@/components/store/PurchaseProvider";
 import { HeroPurchase } from "@/components/store/HeroPurchase";
 import { BuyButton } from "@/components/store/BuyButton";
 import { StickyBuyBar } from "@/components/store/StickyBuyBar";
 import { Faq } from "@/components/store/Faq";
 import { Stars } from "@/components/store/Stars";
-import {
-  STORE,
-  SOCIAL_PROOF,
-  TRUST_BADGES,
-  BENEFITS,
-  REVIEWS,
-} from "@/lib/content";
-
-function Header() {
-  return (
-    <header className="border-b border-white/10">
-      <div className="mx-auto flex max-w-5xl items-center px-6 py-4">
-        <Image
-          src="/logo.png"
-          alt="Dangerous Dino Drivers"
-          width={2816}
-          height={1536}
-          priority
-          className="h-14 w-auto sm:h-16"
-        />
-      </div>
-    </header>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="border-t border-white/10">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-6 py-8 text-center text-sm text-white/40">
-        <p>
-          Questions?{" "}
-          <a
-            className="text-aqua hover:underline"
-            href={`mailto:${STORE.contactEmail}`}
-          >
-            {STORE.contactEmail}
-          </a>
-        </p>
-        <p>
-          © Dangerous Dino Drivers · {STORE.social}
-        </p>
-      </div>
-    </footer>
-  );
-}
+import { STORE, SOCIAL_PROOF, TRUST_BADGES, BENEFITS } from "@/lib/content";
 
 function SocialProofPill() {
   const { rating, count } = SOCIAL_PROOF;
@@ -59,9 +17,7 @@ function SocialProofPill() {
     return (
       <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm">
         <Stars rating={rating} />
-        <span className="font-semibold text-white">
-          {rating.toFixed(1)}
-        </span>
+        <span className="font-semibold text-white">{rating.toFixed(1)}</span>
         <span className="text-white/50">
           · {count.toLocaleString()}+ happy dino families
         </span>
@@ -186,38 +142,9 @@ function Gallery({ product }: { product: PrintifyProduct }) {
           </div>
         ))}
         {/* PLACEHOLDER: swap for a real lifestyle photo (kid holding the pillow / on a bed). */}
-        <div className="flex aspect-square items-center justify-center rounded-2xl border-2 border-dashed border-white/15 bg-white/[0.02] p-4 text-center text-sm text-white/40">
+        <div className="flex aspect-square items-center justify-center rounded-2xl border-2 border-dashed border-white/15 bg-white/[0.02] p-4 text-center text-sm text-white/50">
           📸 Add a real lifestyle photo here
         </div>
-      </div>
-    </section>
-  );
-}
-
-function Reviews() {
-  return (
-    <section className="mx-auto max-w-5xl px-6 py-14">
-      <h2 className="text-center font-display text-2xl text-white sm:text-3xl">
-        What dino families are saying
-      </h2>
-      {/* PLACEHOLDER reviews — REPLACE with real customer reviews before launch.
-          Publishing fabricated reviews violates the FTC fake-review rule (16 CFR Part 465). */}
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
-        {REVIEWS.map((r, i) => (
-          <figure
-            key={i}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"
-          >
-            <Stars rating={r.rating} />
-            <blockquote className="mt-3 text-sm leading-6 text-white/80">
-              “{r.text}”
-            </blockquote>
-            <figcaption className="mt-4 text-sm font-semibold text-white">
-              {r.name}{" "}
-              <span className="font-normal text-white/40">· {r.location}</span>
-            </figcaption>
-          </figure>
-        ))}
       </div>
     </section>
   );
@@ -273,13 +200,13 @@ function FinalCta() {
 function SetupNotice({ message }: { message: string }) {
   return (
     <div className="flex flex-1 flex-col bg-navy">
-      <Header />
+      <SiteHeader />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-6 py-16 text-center">
         <div className="text-6xl">🦕</div>
         <h1 className="mt-4 font-display text-2xl text-white">Almost there</h1>
         <p className="mt-2 max-w-md text-white/60">{message}</p>
       </main>
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }
@@ -306,18 +233,17 @@ export default async function Home() {
   return (
     <PurchaseProvider product={product}>
       <div className="flex flex-1 flex-col bg-navy pb-24 lg:pb-0">
-        <Header />
+        <SiteHeader />
         <main className="flex-1">
           <Hero product={product} />
           <TrustBar />
           <Benefits />
           <Gallery product={product} />
-          <Reviews />
           <Guarantee />
           <FaqSection />
           <FinalCta />
         </main>
-        <Footer />
+        <SiteFooter />
       </div>
       <StickyBuyBar />
     </PurchaseProvider>
