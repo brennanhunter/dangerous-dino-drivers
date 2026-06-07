@@ -4,7 +4,7 @@ export default function SuccessPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-navy px-6 text-center">
       <div className="text-6xl">🦕</div>
-      <h1 className="mt-4 text-4xl font-extrabold text-white">
+      <h1 className="mt-4 font-display text-4xl text-white">
         Order Confirmed!
       </h1>
       <p className="mt-3 text-xl text-aqua">

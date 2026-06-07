@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Rubik_Dirt, Fredoka } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Display / headers — stone-carved, prehistoric vibe.
+const rubikDirt = Rubik_Dirt({
+  weight: "400", // Rubik Dirt ships a single weight
   subsets: ["latin"],
+  variable: "--font-rubik-dirt",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Body / UI — rounded, friendly, highly readable. Variable font (300–700).
+const fredoka = Fredoka({
   subsets: ["latin"],
+  variable: "--font-fredoka",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${rubikDirt.variable} ${fredoka.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

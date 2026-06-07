@@ -71,7 +71,7 @@ export default function ProductView({ product }: { product: PrintifyProduct }) {
 
       {/* Details */}
       <div className="flex flex-col">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+        <h1 className="font-display text-2xl leading-snug text-white sm:text-3xl">
           {product.title}
         </h1>
 
