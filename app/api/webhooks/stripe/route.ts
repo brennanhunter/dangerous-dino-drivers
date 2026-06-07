@@ -2,6 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { createPrintifyOrder } from "@/lib/printify";
+import { getSupabase } from "@/lib/supabase";
+import { sendEmail } from "@/lib/resend";
+import { orderConfirmationEmail } from "@/lib/emails";
 import { BUNDLES, SHIPPING_OPTIONS } from "@/lib/content";
 
 // Node runtime so Stripe's synchronous signature verification (Node crypto) works.
@@ -33,8 +36,7 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
 
     // Only fulfill once payment is actually captured. Card/wallet checkouts are
-    // "paid" on completion; this also guards against async/delayed methods
-    // (e.g. bank debits) if they're ever enabled.
+    // "paid" on completion; this also guards async/delayed methods if ever enabled.
     if (session.payment_status !== "paid") {
       return NextResponse.json({ received: true, fulfilled: false });
     }
@@ -46,18 +48,9 @@ export async function POST(req: NextRequest) {
     const variantId = session.metadata?.variant_id;
     const addr = shipping?.address;
 
-    // Which shipping tier did the buyer pick? Map what they paid to a Printify method.
-    const shippingPaidCents = session.shipping_cost?.amount_total ?? 0;
-    const shippingMethod =
-      SHIPPING_OPTIONS.find((o) => o.amountCents === shippingPaidCents)
-        ?.printifyMethod ?? 1;
-
-    // Stripe's shipping_address_collection enforces address completeness, so
-    // these are present for real sessions. If a required field is missing it's a
-    // PERMANENT problem (retrying won't fix immutable session data) — so we ack
-    // with 200 instead of 500 to stop Stripe from retrying a doomed event.
-    // region/state is intentionally NOT required: it's legitimately empty for
-    // some countries (e.g. GB) and Printify accepts an empty region.
+    // Missing required data is a PERMANENT problem (immutable session) — ack with
+    // 200 so Stripe doesn't retry a doomed event. region/state intentionally not
+    // required (legitimately empty for some countries; Printify accepts empty).
     if (
       !shipping ||
       !email ||
@@ -76,31 +69,89 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true, fulfilled: false });
     }
 
+    // Re-validate quantity against the bundle allowlist (defense in depth).
+    const quantity =
+      BUNDLES.find((b) => b.qty === Number(session.metadata?.quantity))?.qty ?? 1;
+    // Map what the buyer paid for shipping to a Printify fulfillment method.
+    const shippingPaidCents = session.shipping_cost?.amount_total ?? 0;
+    const shippingMethod =
+      SHIPPING_OPTIONS.find((o) => o.amountCents === shippingPaidCents)
+        ?.printifyMethod ?? 1;
+
+    // ── Idempotency gate ───────────────────────────────────────────────────────
+    // Claim this order by inserting a row keyed on the unique stripe_session_id
+    // BEFORE we create the Printify order. If the row already exists (a Stripe
+    // retry or a concurrent delivery), the insert fails with unique_violation and
+    // we skip — so a session can never produce two Printify orders.
+    const supabase = getSupabase();
+    let claimed = false;
+    if (supabase) {
+      const { error } = await supabase.from("orders").insert({
+        stripe_session_id: session.id,
+        email,
+        name: shipping.name,
+        amount_total: session.amount_total,
+        quantity,
+      });
+      if (error) {
+        if (error.code === "23505") {
+          // Already processed/processing — do NOT create another Printify order.
+          console.log(`Order ${session.id} already handled — skipping.`);
+          return NextResponse.json({ received: true, duplicate: true });
+        }
+        // Non-unique DB error (e.g. transient outage): log and proceed so we don't
+        // lose the sale. (Slightly weakens dedup for the rare concurrent-retry case.)
+        console.error("orders insert failed (proceeding without claim)", error);
+      } else {
+        claimed = true;
+      }
+    }
+
+    // ── Fulfillment (the only step Stripe should retry on failure) ─────────────
     try {
       await createPrintifyOrder({
-        externalId: session.id, // idempotency key
+        externalId: session.id, // also passed to Printify as its reference
         variantId: Number(variantId),
-        // Re-validate quantity against the bundle allowlist (defense in depth).
-        quantity:
-          BUNDLES.find((b) => b.qty === Number(session.metadata?.quantity))
-            ?.qty ?? 1,
+        quantity,
         shippingMethod,
         email,
         name: shipping.name,
         phone: session.customer_details?.phone ?? undefined,
         address: {
-          line1: shipping.address.line1,
-          line2: shipping.address.line2,
-          city: shipping.address.city,
-          state: shipping.address.state,
-          postalCode: shipping.address.postal_code,
-          country: shipping.address.country,
+          line1: addr.line1,
+          line2: addr.line2,
+          city: addr.city,
+          state: addr.state,
+          postalCode: addr.postal_code,
+          country: addr.country,
         },
       });
     } catch (err) {
       console.error("Printify order creation failed", err);
-      // Payment already succeeded — return 500 so Stripe retries delivery.
+      // Release the claim so a Stripe retry can cleanly re-attempt fulfillment.
+      if (claimed && supabase) {
+        await supabase
+          .from("orders")
+          .delete()
+          .eq("stripe_session_id", session.id);
+      }
       return new NextResponse("Order fulfillment failed", { status: 500 });
+    }
+
+    // ── Order confirmation email (best-effort: never blocks, never triggers retry) ──
+    try {
+      const firstName = shipping.name.trim().split(/\s+/)[0];
+      const itemName =
+        session.metadata?.item_name ?? "Dangerous Dino Driver Pillowcase";
+      const { subject, html } = orderConfirmationEmail({
+        firstName,
+        quantity,
+        itemName,
+        totalCents: session.amount_total ?? 0,
+      });
+      await sendEmail({ to: email, subject, html });
+    } catch (err) {
+      console.error("order confirmation email failed (non-fatal)", err);
     }
   }
 

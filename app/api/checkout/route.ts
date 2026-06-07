@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
         variant_id: String(variant.id),
         printify_product_id: product.id,
         quantity: String(bundle.qty),
+        item_name: itemName,
       },
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/`,
