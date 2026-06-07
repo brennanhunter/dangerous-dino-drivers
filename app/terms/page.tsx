@@ -40,7 +40,7 @@ export default function TermsPage() {
 
       <h2>Shipping and delivery</h2>
       <p>
-        Products are printed on demand and typically arrive within 3–7 business
+        Products are printed on demand and typically arrive within 5–10 business
         days. Risk of loss passes to you once the order is handed to the carrier.
         You are responsible for providing an accurate shipping address; we cannot
         reship orders sent to an address entered incorrectly. See our{" "}

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { createPrintifyOrder } from "@/lib/printify";
+import { BUNDLES, SHIPPING_OPTIONS } from "@/lib/content";
 
 // Node runtime so Stripe's synchronous signature verification (Node crypto) works.
 export const runtime = "nodejs";
@@ -45,6 +46,12 @@ export async function POST(req: NextRequest) {
     const variantId = session.metadata?.variant_id;
     const addr = shipping?.address;
 
+    // Which shipping tier did the buyer pick? Map what they paid to a Printify method.
+    const shippingPaidCents = session.shipping_cost?.amount_total ?? 0;
+    const shippingMethod =
+      SHIPPING_OPTIONS.find((o) => o.amountCents === shippingPaidCents)
+        ?.printifyMethod ?? 1;
+
     // Stripe's shipping_address_collection enforces address completeness, so
     // these are present for real sessions. If a required field is missing it's a
     // PERMANENT problem (retrying won't fix immutable session data) — so we ack
@@ -73,6 +80,11 @@ export async function POST(req: NextRequest) {
       await createPrintifyOrder({
         externalId: session.id, // idempotency key
         variantId: Number(variantId),
+        // Re-validate quantity against the bundle allowlist (defense in depth).
+        quantity:
+          BUNDLES.find((b) => b.qty === Number(session.metadata?.quantity))
+            ?.qty ?? 1,
+        shippingMethod,
         email,
         name: shipping.name,
         phone: session.customer_details?.phone ?? undefined,

@@ -12,7 +12,8 @@ function formatPrice(cents: number) {
 
 // Always-visible buy bar on mobile (hidden on lg+, where the inline CTAs suffice).
 export function StickyBuyBar() {
-  const { product, variant, buy, loading, error } = usePurchase();
+  const { product, variant, bundle, totalCents, buy, loading, error } =
+    usePurchase();
   const img =
     product.images.find((i) => i.variant_ids.includes(variant.id) && i.is_default) ??
     product.images.find((i) => i.is_default) ??
@@ -41,8 +42,11 @@ export function StickyBuyBar() {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-white">
             {product.title}
+            {bundle.qty > 1 ? ` · ${bundle.qty}-Pack` : ""}
           </p>
-          <p className="text-sm font-bold text-aqua">{formatPrice(variant.price)}</p>
+          <p className="text-sm font-bold text-aqua">
+            {formatPrice(totalCents)}
+          </p>
         </div>
         <button
           type="button"

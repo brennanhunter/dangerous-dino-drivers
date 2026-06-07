@@ -9,7 +9,14 @@ import { BuyButton } from "@/components/store/BuyButton";
 import { StickyBuyBar } from "@/components/store/StickyBuyBar";
 import { Faq } from "@/components/store/Faq";
 import { Stars } from "@/components/store/Stars";
-import { STORE, SOCIAL_PROOF, TRUST_BADGES, BENEFITS } from "@/lib/content";
+import { EmailCapture } from "@/components/store/EmailCapture";
+import {
+  STORE,
+  SOCIAL_PROOF,
+  TRUST_BADGES,
+  BENEFITS,
+  FOUNDER,
+} from "@/lib/content";
 
 function SocialProofPill() {
   const { rating, count } = SOCIAL_PROOF;
@@ -150,6 +157,26 @@ function Gallery({ product }: { product: PrintifyProduct }) {
   );
 }
 
+function FounderStory() {
+  return (
+    <section className="mx-auto max-w-4xl px-6 py-14">
+      <div className="grid items-center gap-8 md:grid-cols-[1fr_1.4fr]">
+        {/* PLACEHOLDER: swap for a real founder/kid photo — faces build huge trust. */}
+        <div className="flex aspect-square items-center justify-center rounded-3xl border-2 border-dashed border-white/15 bg-white/[0.02] p-4 text-center text-sm text-white/50">
+          📸 Add a founder photo (you + your kid)
+        </div>
+        <div>
+          <h2 className="font-display text-2xl text-white sm:text-3xl">
+            {FOUNDER.heading}
+          </h2>
+          <p className="mt-4 leading-7 text-white/70">{FOUNDER.body}</p>
+          <p className="mt-4 font-semibold text-aqua">{FOUNDER.signature}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Guarantee() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-12">
@@ -239,8 +266,10 @@ export default async function Home() {
           <TrustBar />
           <Benefits />
           <Gallery product={product} />
+          <FounderStory />
           <Guarantee />
           <FaqSection />
+          <EmailCapture />
           <FinalCta />
         </main>
         <SiteFooter />

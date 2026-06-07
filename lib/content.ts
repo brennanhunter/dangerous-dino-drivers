@@ -5,9 +5,46 @@ export const STORE = {
   contactEmail: "dangerousdinodrivers@gmail.com",
   phone: "386-610-3000",
   social: "@dangerousdinodrivers",
-  shippingNote: "Ships in 3–7 business days",
+  shippingNote: "Free shipping · arrives in 5–10 days",
   guaranteeDays: 30,
 };
+
+// YOUR selling price for one pillowcase, in cents. THIS is what the store charges.
+// Printify's price field is ignored — Printify is purely your supplier (cost +
+// fulfillment). Change your price here, then redeploy.
+export const PRODUCT_PRICE_CENTS = 3499; // $34.99
+
+// Shipping tiers shown at checkout. Standard is free (you absorb Printify's
+// standard cost); express is a flat fee the customer pays that covers Printify's
+// expedited rate (priority ≈ $28.99 flat for this product). printifyMethod maps
+// to Printify shipping_method: 1=standard, 2=priority, 3=express.
+export type ShippingOption = {
+  key: string;
+  label: string;
+  amountCents: number;
+  printifyMethod: number;
+  minDays: number;
+  maxDays: number;
+};
+
+export const SHIPPING_OPTIONS: ShippingOption[] = [
+  {
+    key: "standard",
+    label: "Free Shipping",
+    amountCents: 0,
+    printifyMethod: 1,
+    minDays: 5,
+    maxDays: 10,
+  },
+  {
+    key: "express",
+    label: "Express Shipping",
+    amountCents: 2999,
+    printifyMethod: 2,
+    minDays: 2,
+    maxDays: 5,
+  },
+];
 
 // PLACEHOLDER social proof. Leave count at 0 until you have REAL reviews — the
 // hero shows an honest "brand-new" badge while count is 0, and switches to a
@@ -15,7 +52,7 @@ export const STORE = {
 export const SOCIAL_PROOF = { rating: 4.9, count: 0 };
 
 export const TRUST_BADGES = [
-  { icon: "🚚", label: "Ships in 3–7 days" },
+  { icon: "🚚", label: "Free shipping" },
   { icon: "↩️", label: "30-day returns" },
   { icon: "🧺", label: "Machine washable" },
   { icon: "🔒", label: "Secure checkout" },
@@ -42,7 +79,7 @@ export const BENEFITS = [
 export const FAQS = [
   {
     q: "How long does shipping take?",
-    a: "Each pillowcase is made to order, then ships and typically arrives within 3–7 business days. You’ll get tracking by email as soon as it’s on the way.",
+    a: "Shipping is free. Each pillowcase is made to order, then arrives within 5–10 business days — you’ll get tracking by email as soon as it’s on the way.",
   },
   {
     q: "How do I wash it?",
@@ -61,3 +98,35 @@ export const FAQS = [
     a: "Yes. Payments are handled by Stripe with bank-level encryption, and Apple Pay & Google Pay are available. We never see your card details.",
   },
 ];
+
+// Bundle offers. Multi-packs are a % off PRODUCT_PRICE_CENTS (your configured
+// price), so they always track it. Shipping is free, so buying more is cheaper
+// per item at no extra delivery cost.
+export type Bundle = {
+  qty: number;
+  label: string;
+  discountPct: number; // % off the live per-unit price (0 = single, full price)
+  badge: string | null;
+};
+
+export const BUNDLES: Bundle[] = [
+  { qty: 1, label: "Single", discountPct: 0, badge: null },
+  { qty: 2, label: "2-Pack", discountPct: 10, badge: "Most popular" },
+  { qty: 3, label: "3-Pack", discountPct: 15, badge: "Best value" },
+];
+
+// Bundle total derived from the live single-unit price. Multi-packs round to a
+// clean .99. Server and client both use this so the displayed and charged
+// prices always match.
+export function bundleTotalCents(bundle: Bundle, unitCents: number): number {
+  if (!Number.isFinite(unitCents) || unitCents < 0) return 0;
+  if (bundle.qty <= 1 || bundle.discountPct <= 0) return unitCents * bundle.qty;
+  const raw = unitCents * bundle.qty * (1 - bundle.discountPct / 100);
+  return Math.max(Math.round(raw / 100) * 100 - 1, 0);
+}
+
+export const FOUNDER = {
+  heading: "Made by a dad, for dino kids",
+  body: "Dangerous Dino Drivers started on a living-room floor in DeLand, Florida — a dad and a dinosaur-obsessed kid who figured every T-rex deserves a monster truck. We couldn’t find pillowcases that were actually fun, so we made our own: soft enough for real bedtimes, bold enough that kids show them off. Every order is printed and shipped from the US, and a real human answers your emails.",
+  signature: "— The Dangerous Dino Drivers family",
+};

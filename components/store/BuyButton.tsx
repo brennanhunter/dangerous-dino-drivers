@@ -18,7 +18,7 @@ export function BuyButton({
   size?: "lg" | "md";
   showError?: boolean;
 }) {
-  const { buy, loading, variant, error } = usePurchase();
+  const { buy, loading, totalCents, error } = usePurchase();
 
   return (
     <div>
@@ -30,7 +30,7 @@ export function BuyButton({
           size === "lg" ? "px-8 py-4 text-xl" : "px-6 py-3.5 text-lg"
         }`}
       >
-        {loading ? "Starting checkout…" : (label ?? `Buy Now — ${formatPrice(variant.price)}`)}
+        {loading ? "Starting checkout…" : (label ?? `Buy Now — ${formatPrice(totalCents)}`)}
       </button>
       {showError && error && (
         <p className="mt-2 text-center text-sm font-medium text-red-400" role="alert">

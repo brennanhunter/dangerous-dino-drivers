@@ -61,7 +61,7 @@ export default function RefundsPage() {
 
       <h2>Shipping &amp; delivery</h2>
       <p>
-        Items are made to order and typically arrive within 3–7 business days.
+        Items are made to order and typically arrive within 5–10 business days.
         You’ll receive tracking by email once your order ships.
       </p>
 

@@ -1,16 +1,25 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getProduct } from "@/lib/printify";
+import {
+  BUNDLES,
+  bundleTotalCents,
+  PRODUCT_PRICE_CENTS,
+  SHIPPING_OPTIONS,
+} from "@/lib/content";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { variantId } = await req.json();
+    const { variantId, qty } = await req.json();
     if (variantId === undefined || variantId === null) {
       return NextResponse.json({ error: "Missing variantId" }, { status: 400 });
     }
     const variantIdNum = Number(variantId);
+
+    // Validate the bundle (quantity) against the server-side allowlist.
+    const bundle = BUNDLES.find((b) => b.qty === Number(qty)) ?? BUNDLES[0];
 
     // Derive price + title from Printify SERVER-SIDE. Never trust a price sent
     // from the browser — otherwise a buyer could pay $0.01 for anything.
@@ -26,6 +35,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Bundle total is the server-authoritative price, derived from our configured
+    // selling price (Printify's price field is intentionally ignored).
+    const unitAmount = bundleTotalCents(bundle, PRODUCT_PRICE_CENTS);
+    if (unitAmount <= 0) {
+      console.error("Invalid computed price", {
+        price: variant.price,
+        qty: bundle.qty,
+      });
+      return NextResponse.json({ error: "Checkout failed" }, { status: 500 });
+    }
+    const itemName =
+      bundle.qty > 1
+        ? `${product.title} — ${bundle.qty}-Pack`
+        : `${product.title} — ${variant.title}`;
+
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? req.nextUrl.origin;
     const heroImage =
       product.images.find((i) => i.is_default)?.src ?? product.images[0]?.src;
@@ -38,10 +62,10 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `${product.title} — ${variant.title}`,
+              name: itemName,
               ...(heroImage ? { images: [heroImage] } : {}),
             },
-            unit_amount: variant.price, // cents, straight from Printify
+            unit_amount: unitAmount, // server-authoritative bundle/unit total
           },
           quantity: 1,
         },
@@ -50,22 +74,21 @@ export async function POST(req: NextRequest) {
         allowed_countries: ["US", "CA", "GB", "AU"],
       },
       phone_number_collection: { enabled: true },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            display_name: "Standard Shipping",
-            fixed_amount: { amount: 599, currency: "usd" },
-            delivery_estimate: {
-              minimum: { unit: "business_day", value: 3 },
-              maximum: { unit: "business_day", value: 7 },
-            },
+      shipping_options: SHIPPING_OPTIONS.map((o) => ({
+        shipping_rate_data: {
+          type: "fixed_amount",
+          display_name: o.label,
+          fixed_amount: { amount: o.amountCents, currency: "usd" },
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: o.minDays },
+            maximum: { unit: "business_day", value: o.maxDays },
           },
         },
-      ],
+      })),
       metadata: {
         variant_id: String(variant.id),
         printify_product_id: product.id,
+        quantity: String(bundle.qty),
       },
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/`,

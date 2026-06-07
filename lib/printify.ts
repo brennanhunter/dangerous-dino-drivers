@@ -36,6 +36,7 @@ export interface CreateOrderInput {
   externalId: string; // Stripe session id — used for idempotency / reconciliation
   variantId: number;
   quantity?: number;
+  shippingMethod?: number; // Printify shipping_method: 1=standard, 2=priority, 3=express
   email: string;
   name: string;
   phone?: string;
@@ -69,7 +70,7 @@ export async function createPrintifyOrder(input: CreateOrderInput) {
         quantity: input.quantity ?? 1,
       },
     ],
-    shipping_method: 1, // 1 = standard
+    shipping_method: input.shippingMethod ?? 1, // 1=standard, 2=priority, 3=express
     send_shipping_notification: true,
     // NOTE: the order is created "on hold" and is NOT charged until it is sent
     // to production (Printify auto-sends ~24h later by default). We deliberately

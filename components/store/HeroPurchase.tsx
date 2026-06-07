@@ -2,6 +2,7 @@
 
 import { usePurchase } from "./PurchaseProvider";
 import { VariantPicker } from "./VariantPicker";
+import { BundlePicker } from "./BundlePicker";
 import { BuyButton } from "./BuyButton";
 
 function formatPrice(cents: number) {
@@ -12,12 +13,15 @@ function formatPrice(cents: number) {
 }
 
 export function HeroPurchase() {
-  const { variant } = usePurchase();
+  const { totalCents } = usePurchase();
 
   return (
     <div className="w-full">
-      <p className="text-4xl font-bold text-aqua">{formatPrice(variant.price)}</p>
+      <p className="text-4xl font-bold text-aqua">{formatPrice(totalCents)}</p>
       <VariantPicker />
+      <div className="mt-5">
+        <BundlePicker />
+      </div>
       <div className="mt-5">
         <BuyButton showError />
       </div>
