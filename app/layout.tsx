@@ -81,6 +81,10 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  verification: {
+    // Google Search Console — HTML tag verification method.
+    google: "_chnQsnhpM7KOJOBOiGSBSqVdSBSTJp6e20SnKKWbNQ",
+  },
 };
 
 export const viewport: Viewport = {
