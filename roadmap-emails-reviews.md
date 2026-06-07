@@ -4,6 +4,11 @@ We'll work through this together, one phase at a time. **Phase 0 is yours** (pro
 accounts). Phases 1–5 are mine (build). Everything is written to be **graceful when
 keys are missing** — the store keeps working; emails/DB just no-op until configured.
 
+> **Status:** ✅ Phase 0 · ✅ Phase 1 · ✅ Phase 2 · ✅ Phase 3 · ✅ Phase 4 (audited) · ✅ Phase 5 —
+> all built and verified locally against live Supabase + Resend. Remaining: **Phase 6** —
+> deploy to Vercel (add env incl. `CRON_SECRET` + `NEXT_PUBLIC_BASE_URL`, set the production
+> Stripe webhook) and run one Stripe **test** purchase to confirm the full live flow.
+
 ## Architecture
 - **Resend** → sends emails: order confirmation, Dino Club welcome, review request.
 - **Supabase (Postgres)** → stores: `subscribers`, `orders`, `reviews`.
