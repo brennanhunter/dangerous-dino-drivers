@@ -33,8 +33,8 @@ export function EmailCapture() {
       <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-center">
         <h2 className="font-display text-2xl text-white">Join the Dino Club</h2>
         <p className="mx-auto mt-2 max-w-md text-white/60">
-          First dibs on new designs, restocks, and launch-day deals. No spam —
-          just dinos.
+          Get first dibs on the next drops — more dino drivers, plus sheets &amp;
+          blankets coming soon. No spam, just dinos.
         </p>
         {status === "done" ? (
           <p className="mt-6 font-semibold text-aqua">

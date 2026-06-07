@@ -15,6 +15,9 @@ export function SiteFooter() {
           <Link href="/refunds" className="hover:text-aqua">
             Refunds &amp; Returns
           </Link>
+          <Link href="/review" className="hover:text-aqua">
+            Write a review
+          </Link>
         </nav>
         <p>
           Questions?{" "}

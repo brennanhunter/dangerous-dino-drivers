@@ -10,23 +10,24 @@ import { StickyBuyBar } from "@/components/store/StickyBuyBar";
 import { Faq } from "@/components/store/Faq";
 import { Stars } from "@/components/store/Stars";
 import { EmailCapture } from "@/components/store/EmailCapture";
-import {
-  STORE,
-  SOCIAL_PROOF,
-  TRUST_BADGES,
-  BENEFITS,
-  FOUNDER,
-} from "@/lib/content";
+import { SubscribePopup } from "@/components/store/SubscribePopup";
+import { STORE, TRUST_BADGES, BENEFITS, FOUNDER } from "@/lib/content";
+import { getApprovedReviews, type Review } from "@/lib/reviews";
 
-function SocialProofPill() {
-  const { rating, count } = SOCIAL_PROOF;
+// Cache the homepage (Printify product + approved reviews) for 1 hour, so the
+// Supabase reviews read isn't hit on every request. New approvals appear within
+// the window (or on the next deploy).
+export const revalidate = 3600;
+
+function SocialProofPill({ rating, count }: { rating: number; count: number }) {
   if (count > 0) {
     return (
       <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm">
         <Stars rating={rating} />
         <span className="font-semibold text-white">{rating.toFixed(1)}</span>
         <span className="text-white/50">
-          · {count.toLocaleString()}+ happy dino families
+          · {count.toLocaleString()} happy dino{" "}
+          {count === 1 ? "family" : "families"}
         </span>
       </div>
     );
@@ -39,7 +40,15 @@ function SocialProofPill() {
   );
 }
 
-function Hero({ product }: { product: PrintifyProduct }) {
+function Hero({
+  product,
+  rating,
+  count,
+}: {
+  product: PrintifyProduct;
+  rating: number;
+  count: number;
+}) {
   const img = product.images.find((i) => i.is_default) ?? product.images[0];
   return (
     <section className="mx-auto grid max-w-5xl gap-8 px-6 py-10 md:grid-cols-2 md:items-center md:gap-12 md:py-16">
@@ -61,7 +70,7 @@ function Hero({ product }: { product: PrintifyProduct }) {
       </div>
 
       <div className="order-2 md:order-1">
-        <SocialProofPill />
+        <SocialProofPill rating={rating} count={count} />
         <h1 className="mt-4 font-display text-3xl leading-tight text-white sm:text-4xl md:text-5xl">
           Bedtime just got
           <br />
@@ -177,6 +186,52 @@ function FounderStory() {
   );
 }
 
+function Reviews({ reviews }: { reviews: Review[] }) {
+  if (reviews.length === 0) return null;
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-14">
+      <h2 className="text-center font-display text-2xl text-white sm:text-3xl">
+        What dino families are saying
+      </h2>
+      <div className="mt-8 grid gap-6 md:grid-cols-3">
+        {reviews.map((r) => (
+          <figure
+            key={r.id}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"
+          >
+            <Stars rating={r.rating} />
+            {r.photo_url && (
+              <div className="relative mt-3 h-40 w-full overflow-hidden rounded-xl bg-white/5">
+                <Image
+                  src={r.photo_url}
+                  alt={`Photo from ${r.name}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover"
+                />
+              </div>
+            )}
+            <blockquote className="mt-3 text-sm leading-6 text-white/80">
+              “{r.body}”
+            </blockquote>
+            <figcaption className="mt-4 text-sm font-semibold text-white">
+              {r.name}
+              {r.location && (
+                <span className="font-normal text-white/50"> · {r.location}</span>
+              )}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <p className="mt-6 text-center text-sm">
+        <a href="/review" className="text-aqua hover:underline">
+          Bought one? Leave a review →
+        </a>
+      </p>
+    </section>
+  );
+}
+
 function Guarantee() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-12">
@@ -257,17 +312,20 @@ export default async function Home() {
     );
   }
 
+  const { reviews, count, avgRating } = await getApprovedReviews();
+
   return (
     <PurchaseProvider product={product}>
       <div className="flex flex-1 flex-col bg-navy pb-24 lg:pb-0">
         <SiteHeader />
         <main className="flex-1">
-          <Hero product={product} />
+          <Hero product={product} rating={avgRating} count={count} />
           <TrustBar />
           <Benefits />
           <Gallery product={product} />
           <FounderStory />
           <Guarantee />
+          <Reviews reviews={reviews} />
           <FaqSection />
           <EmailCapture />
           <FinalCta />
@@ -275,6 +333,7 @@ export default async function Home() {
         <SiteFooter />
       </div>
       <StickyBuyBar />
+      <SubscribePopup />
     </PurchaseProvider>
   );
 }

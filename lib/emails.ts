@@ -7,6 +7,12 @@ const BRAND = {
   purple: "#7c3aed",
 };
 
+// Email-optimized logo hosted on Supabase public storage (emails need an absolute
+// URL; local /public paths don't resolve in a recipient's inbox).
+const LOGO_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/assets/logo-email.png`
+  : "";
+
 function escapeHtml(s: string): string {
   return s.replace(
     /[&<>"']/g,
@@ -38,7 +44,11 @@ function layout(bodyHtml: string): string {
   <div style="max-width:520px;margin:0 auto;padding:24px;">
     <div style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #1f2937;">
       <div style="background:${BRAND.navy};padding:20px 24px;text-align:center;">
-        <span style="color:${BRAND.aqua};font-size:18px;font-weight:800;letter-spacing:.5px;">DANGEROUS DINO DRIVERS</span>
+        ${
+          LOGO_URL
+            ? `<img src="${LOGO_URL}" alt="Dangerous Dino Drivers" width="220" style="width:220px;max-width:80%;height:auto;display:block;margin:0 auto;border:0;">`
+            : `<span style="color:${BRAND.aqua};font-size:18px;font-weight:800;letter-spacing:.5px;">DANGEROUS DINO DRIVERS</span>`
+        }
       </div>
       <div style="padding:24px;font-size:15px;line-height:1.6;color:#1f2937;">${bodyHtml}</div>
     </div>
@@ -76,7 +86,7 @@ export function welcomeEmail(p: { shopUrl: string }): {
     subject: "You're in the Dino Club 🦖",
     html: layout(`
       <p>Welcome to the pack! 🦕</p>
-      <p>You'll be first to hear about new designs, restocks, and launch-day deals. No spam — just dinos.</p>
+      <p>You're on the list for what's next — more <strong>dino drivers</strong>, plus <strong>sheets &amp; blankets</strong> coming soon — and first dibs on launch-day deals. No spam, just dinos.</p>
       <p style="margin:20px 0;">${button(p.shopUrl, "Shop the pillowcase")}</p>
       <p>— The Dangerous Dino Drivers family</p>
     `),

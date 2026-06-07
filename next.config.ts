@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.printify.com" },
       { protocol: "https", hostname: "images-api.printify.com" },
+      // Supabase Storage (review photos)
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
 };

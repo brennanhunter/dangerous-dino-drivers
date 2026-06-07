@@ -46,11 +46,6 @@ export const SHIPPING_OPTIONS: ShippingOption[] = [
   },
 ];
 
-// PLACEHOLDER social proof. Leave count at 0 until you have REAL reviews — the
-// hero shows an honest "brand-new" badge while count is 0, and switches to a
-// star rating once count > 0. Never display fabricated numbers (FTC 16 CFR 465).
-export const SOCIAL_PROOF = { rating: 4.9, count: 0 };
-
 export const TRUST_BADGES = [
   { icon: "🚚", label: "Free shipping" },
   { icon: "↩️", label: "30-day returns" },

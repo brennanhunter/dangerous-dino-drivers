@@ -1,4 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getSupabase } from "@/lib/supabase";
+import { sendEmail } from "@/lib/resend";
+import { welcomeEmail } from "@/lib/emails";
 
 export const runtime = "nodejs";
 
@@ -7,22 +10,38 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
-    if (typeof email !== "string" || !EMAIL_RE.test(email.trim())) {
+    const clean = typeof email === "string" ? email.trim().toLowerCase() : "";
+    if (!EMAIL_RE.test(clean)) {
       return NextResponse.json(
         { error: "Please enter a valid email." },
         { status: 400 },
       );
     }
 
-    // INTEGRATION POINT: connect your email service provider here.
-    // Recommended: Klaviyo (best ecom welcome + abandoned-checkout flows).
-    // Until an ESP is wired, signups are only logged server-side and are NOT
-    // persisted anywhere — don't rely on this list until you connect a provider.
-    //   e.g. if (process.env.KLAVIYO_API_KEY) await subscribeToKlaviyo(email.trim());
-    const stored = false;
-    console.log(`[subscribe] ${email.trim()} (stored=${stored})`);
+    const supabase = getSupabase();
+    let isNew = true;
+    if (supabase) {
+      const { error } = await supabase
+        .from("subscribers")
+        .insert({ email: clean });
+      if (error) {
+        if (error.code === "23505") {
+          isNew = false; // already subscribed — that's fine, just don't re-welcome
+        } else {
+          // Transient DB error: log, but don't break the UX over it.
+          console.error("subscriber insert failed", error);
+        }
+      }
+    }
 
-    return NextResponse.json({ ok: true, stored });
+    // Welcome email only on a genuinely new signup (best-effort inside sendEmail).
+    if (isNew) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? req.nextUrl.origin;
+      const { subject, html } = welcomeEmail({ shopUrl: baseUrl });
+      await sendEmail({ to: clean, subject, html });
+    }
+
+    return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
