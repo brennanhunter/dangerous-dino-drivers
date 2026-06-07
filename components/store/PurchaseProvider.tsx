@@ -16,6 +16,7 @@ import {
   type Bundle,
 } from "@/lib/content";
 import { trackInitiateCheckout, trackViewContent } from "@/lib/tiktok";
+import { gaBeginCheckout, gaViewItem } from "@/lib/gtag";
 
 type PurchaseContextValue = {
   product: PrintifyProduct;
@@ -69,6 +70,11 @@ export function PurchaseProvider({
       valueCents: PRODUCT_PRICE_CENTS,
       contentName: product.title,
     });
+    gaViewItem({
+      id: String(product.id),
+      name: product.title,
+      valueCents: PRODUCT_PRICE_CENTS,
+    });
     // Fire once when the product page mounts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,6 +85,11 @@ export function PurchaseProvider({
     try {
       trackInitiateCheckout({
         contentId: String(product.id),
+        valueCents: totalCents,
+        quantity: bundle.qty,
+      });
+      gaBeginCheckout({
+        id: String(product.id),
         valueCents: totalCents,
         quantity: bundle.qty,
       });

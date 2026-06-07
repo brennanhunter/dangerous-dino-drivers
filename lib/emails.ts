@@ -93,6 +93,34 @@ export function welcomeEmail(p: { shopUrl: string }): {
   };
 }
 
+// Internal alert to the merchant (you) on every paid order.
+export function merchantSaleEmail(p: {
+  itemName: string;
+  quantity: number;
+  totalCents: number;
+  customerName: string;
+  customerEmail: string;
+  city: string | null;
+  state: string | null;
+}): { subject: string; html: string } {
+  const place = [p.city, p.state].filter(Boolean).join(", ");
+  return {
+    subject: `🦕 New order — ${formatPrice(p.totalCents)} (${p.customerName})`,
+    html: layout(`
+      <p style="font-size:18px;font-weight:700;">You made a sale! 🎉</p>
+      <p style="background:#f3f4f6;border-radius:12px;padding:14px 16px;font-weight:700;margin:16px 0;">
+        ${p.quantity} × ${escapeHtml(p.itemName)} — ${formatPrice(p.totalCents)}
+      </p>
+      <p>
+        <strong>Customer:</strong> ${escapeHtml(p.customerName)}<br>
+        <strong>Email:</strong> ${escapeHtml(p.customerEmail)}<br>
+        ${place ? `<strong>Ships to:</strong> ${escapeHtml(place)}` : ""}
+      </p>
+      <p>The Printify order was placed automatically — check Printify to confirm production.</p>
+    `),
+  };
+}
+
 export function reviewRequestEmail(p: {
   firstName?: string;
   reviewUrl: string;

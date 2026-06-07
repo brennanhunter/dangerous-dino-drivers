@@ -82,7 +82,7 @@ export const FAQS = [
   },
   {
     q: "What size is it?",
-    a: "Standard 20\" × 30\", which fits standard and queen pillows. It’s the pillowcase only — pillow insert not included.",
+    a: "Two sizes: 20\" × 30\" (fits standard/queen pillows) and 20\" × 40\" (fits king pillows). It’s the pillowcase only — pillow insert not included.",
   },
   {
     q: "What’s your return policy?",
@@ -122,6 +122,6 @@ export function bundleTotalCents(bundle: Bundle, unitCents: number): number {
 
 export const FOUNDER = {
   heading: "Made by a dad, for dino kids",
-  body: "Dangerous Dino Drivers started on a living-room floor in DeLand, Florida — a dad and a dinosaur-obsessed kid who figured every T-rex deserves a monster truck. We couldn’t find pillowcases that were actually fun, so we made our own: soft enough for real bedtimes, bold enough that kids show them off. Every order is printed and shipped from the US, and a real human answers your emails.",
+  body: "Dangerous Dino Drivers started on a living-room floor in DeLand, Florida — a dad and a dinosaur-obsessed kid who figured every triceratops deserves a monster truck. We couldn’t find pillowcases that were actually fun, so we made our own: soft enough for real bedtimes, bold enough that kids show them off. Every order is printed and shipped from the US, and a real human answers your emails.",
   signature: "— The Dangerous Dino Drivers family",
 };

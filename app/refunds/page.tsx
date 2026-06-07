@@ -48,9 +48,9 @@ export default function RefundsPage() {
 
       <h2>Sizing</h2>
       <p>
-        Our pillowcase is a standard 20″ × 30″ and fits standard and queen
-        pillows. Please check the size before ordering — wrong-size change of mind
-        isn’t covered, but quality issues always are.
+        Our pillowcases come in 20″ × 30″ (standard/queen) and 20″ × 40″ (king).
+        Please check the size before ordering — wrong-size change of mind isn’t
+        covered, but quality issues always are.
       </p>
 
       <h2>How refunds are issued</h2>

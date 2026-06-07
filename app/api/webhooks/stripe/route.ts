@@ -4,8 +4,8 @@ import { getStripe } from "@/lib/stripe";
 import { createPrintifyOrder } from "@/lib/printify";
 import { getSupabase } from "@/lib/supabase";
 import { sendEmail } from "@/lib/resend";
-import { orderConfirmationEmail } from "@/lib/emails";
-import { BUNDLES, SHIPPING_OPTIONS } from "@/lib/content";
+import { orderConfirmationEmail, merchantSaleEmail } from "@/lib/emails";
+import { BUNDLES, SHIPPING_OPTIONS, STORE } from "@/lib/content";
 
 // Node runtime so Stripe's synchronous signature verification (Node crypto) works.
 export const runtime = "nodejs";
@@ -138,20 +138,43 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Order fulfillment failed", { status: 500 });
     }
 
-    // ── Order confirmation email (best-effort: never blocks, never triggers retry) ──
+    // ── Notifications (best-effort: never block, never trigger a retry) ──
+    const firstName = shipping.name.trim().split(/\s+/)[0];
+    const itemName =
+      session.metadata?.item_name ?? "Dangerous Dino Driver Pillowcase";
+    const totalCents = session.amount_total ?? 0;
+
+    // Customer order confirmation
     try {
-      const firstName = shipping.name.trim().split(/\s+/)[0];
-      const itemName =
-        session.metadata?.item_name ?? "Dangerous Dino Driver Pillowcase";
-      const { subject, html } = orderConfirmationEmail({
+      const conf = orderConfirmationEmail({
         firstName,
         quantity,
         itemName,
-        totalCents: session.amount_total ?? 0,
+        totalCents,
       });
-      await sendEmail({ to: email, subject, html });
+      await sendEmail({ to: email, subject: conf.subject, html: conf.html });
     } catch (err) {
       console.error("order confirmation email failed (non-fatal)", err);
+    }
+
+    // Merchant "you made a sale!" alert
+    try {
+      const alert = merchantSaleEmail({
+        itemName,
+        quantity,
+        totalCents,
+        customerName: shipping.name,
+        customerEmail: email,
+        city: addr.city,
+        state: addr.state,
+      });
+      await sendEmail({
+        to: STORE.contactEmail,
+        subject: alert.subject,
+        html: alert.html,
+      });
+    } catch (err) {
+      console.error("merchant sale alert failed (non-fatal)", err);
     }
   }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { trackPurchase } from "@/lib/tiktok";
+import { gaPurchase } from "@/lib/gtag";
 
 // Fires the TikTok CompletePayment event once per order. De-dupes across page
 // refreshes and back/forward navigation using the Stripe session id, so a
@@ -29,6 +30,7 @@ export function PurchaseTracker({
 
     fired.current = true;
     trackPurchase({ valueCents });
+    gaPurchase({ transactionId: eventId, valueCents });
   }, [valueCents, eventId]);
 
   return null;

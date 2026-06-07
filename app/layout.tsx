@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Rubik_Dirt, Fredoka } from "next/font/google";
 import { TikTokPixel } from "@/components/analytics/TikTokPixel";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import "./globals.css";
 
 // Display / headers — stone-carved, prehistoric vibe.
@@ -105,6 +106,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <TikTokPixel />
+        <GoogleAnalytics />
         {children}
       </body>
     </html>
