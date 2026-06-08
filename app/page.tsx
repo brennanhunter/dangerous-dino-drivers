@@ -81,9 +81,9 @@ function Hero({
           gift dino-obsessed kids actually beg for.
         </p>
         <ul className="mt-5 space-y-2 text-white/80">
-          <li>✅ Ridiculously soft, gentle on little cheeks</li>
-          <li>✅ Machine-washable, fade-resistant prints</li>
-          <li>✅ Bold original art kids show off</li>
+          <li>✅ Silky-soft microfiber, gentle on little cheeks</li>
+          <li>✅ Machine-washable — colors stay bright</li>
+          <li>✅ Bold double-sided dino art kids show off</li>
         </ul>
         <div className="mt-7">
           <HeroPurchase />

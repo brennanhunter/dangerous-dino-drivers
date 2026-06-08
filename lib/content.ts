@@ -57,7 +57,7 @@ export const BENEFITS = [
   {
     icon: "🛋️",
     title: "Ridiculously Soft",
-    text: "Brushed, cozy fabric that’s gentle on little cheeks and built for cuddles.",
+    text: "Silky-soft microfiber that’s gentle on little cheeks and made for cuddles.",
   },
   {
     icon: "🧺",
@@ -67,7 +67,7 @@ export const BENEFITS = [
   {
     icon: "🦖",
     title: "Designs Kids Show Off",
-    text: "Original dino-driver art so good your kid will give you the bedroom tour.",
+    text: "Bold, double-sided dino art so good your kid gives you the bedroom tour.",
   },
 ];
 
@@ -78,7 +78,11 @@ export const FAQS = [
   },
   {
     q: "How do I wash it?",
-    a: "Machine wash cold and tumble dry low. The print is fade-resistant, so the colors stay bold wash after wash.",
+    a: "Machine wash cold (gentle cycle, mild detergent) and tumble dry low. The print is fade-resistant, so the colors stay bright wash after wash.",
+  },
+  {
+    q: "What’s it made of?",
+    a: "Silky-soft microfiber — 100% polyester with quick-dry, split fibers. The dino is printed all over on both sides, and a reinforced 3.25\" hemmed cuff keeps the edges crisp. Lightweight, gentle on skin, and holds its bright colors wash after wash.",
   },
   {
     q: "What size is it?",
