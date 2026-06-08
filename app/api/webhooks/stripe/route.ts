@@ -4,7 +4,11 @@ import { getStripe } from "@/lib/stripe";
 import { createPrintifyOrder } from "@/lib/printify";
 import { getSupabase } from "@/lib/supabase";
 import { sendEmail } from "@/lib/resend";
-import { orderConfirmationEmail, merchantSaleEmail } from "@/lib/emails";
+import {
+  orderConfirmationEmail,
+  merchantSaleEmail,
+  abandonedCheckoutEmail,
+} from "@/lib/emails";
 import { BUNDLES, SHIPPING_OPTIONS, STORE } from "@/lib/content";
 
 // Node runtime so Stripe's synchronous signature verification (Node crypto) works.
@@ -175,6 +179,29 @@ export async function POST(req: NextRequest) {
       });
     } catch (err) {
       console.error("merchant sale alert failed (non-fatal)", err);
+    }
+  }
+
+  // Abandoned checkout → email a recovery link. Fires once per expired session
+  // (~24h after creation), only when the shopper left an email and Stripe minted
+  // a recovery URL. Best-effort; no retry needed.
+  if (event.type === "checkout.session.expired") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const email = session.customer_details?.email ?? session.customer_email;
+    const recoveryUrl = session.after_expiration?.recovery?.url;
+    if (email && recoveryUrl) {
+      try {
+        const { subject, html } = abandonedCheckoutEmail({
+          firstName: session.customer_details?.name?.trim().split(/\s+/)[0],
+          recoveryUrl,
+          itemName: session.metadata?.item_name,
+          quantity: Number(session.metadata?.quantity) || 1,
+          totalCents: session.amount_total ?? undefined,
+        });
+        await sendEmail({ to: email, subject, html });
+      } catch (err) {
+        console.error("abandoned checkout email failed (non-fatal)", err);
+      }
     }
   }
 

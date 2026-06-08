@@ -56,6 +56,7 @@ CRON_SECRET=                      # any long random string; protects the cron ro
 ```
 
 ### Supabase schema — run this in the SQL Editor
+> **Source of truth: [`supabase/schema.sql`](supabase/schema.sql)** — run that file. The block below is kept for reference only.
 ```sql
 -- Dangerous Dino Drivers schema
 

@@ -121,6 +121,29 @@ export function merchantSaleEmail(p: {
   };
 }
 
+export function abandonedCheckoutEmail(p: {
+  firstName?: string;
+  recoveryUrl: string;
+  itemName?: string;
+  quantity?: number;
+  totalCents?: number;
+}): { subject: string; html: string } {
+  const hi = p.firstName ? `Hey ${escapeHtml(p.firstName)},` : "Hey there,";
+  const line = p.itemName
+    ? `<p style="background:#f3f4f6;border-radius:12px;padding:14px 16px;font-weight:700;margin:16px 0;">${p.quantity ?? 1} × ${escapeHtml(p.itemName)}${p.totalCents ? ` — ${formatPrice(p.totalCents)}` : ""}</p>`
+    : "";
+  return {
+    subject: "You left a dino behind 🦕",
+    html: layout(`
+      <p>${hi} you were one tap away — your Dangerous Dino Driver is still in your cart.</p>
+      ${line}
+      <p style="margin:20px 0;">${button(p.recoveryUrl, "Finish your order")}</p>
+      <p>Free shipping, a 30-day money-back guarantee, and a kid who&#39;s about to be obsessed. 🦖</p>
+      <p>— The Dangerous Dino Drivers family</p>
+    `),
+  };
+}
+
 export function reviewRequestEmail(p: {
   firstName?: string;
   reviewUrl: string;

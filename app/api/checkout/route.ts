@@ -74,6 +74,8 @@ export async function POST(req: NextRequest) {
         allowed_countries: ["US", "CA", "GB", "AU"],
       },
       phone_number_collection: { enabled: true },
+      // Mint a recovery URL for abandoned (expired) checkouts so we can email it.
+      after_expiration: { recovery: { enabled: true } },
       shipping_options: SHIPPING_OPTIONS.map((o) => ({
         shipping_rate_data: {
           type: "fixed_amount",
